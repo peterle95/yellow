@@ -1,3 +1,4 @@
+import Test from "../components/test"
 import CardNav from "../components/CardNav"
 import logo from "../../public/file.svg"
 import Aurora from '../components/Aurora';
@@ -14,7 +15,7 @@ const App = () => {
       ]
     },
     {
-      label: "Projects", 
+      label: "Projects",
       bgColor: "#2F293A",
       textColor: "#fff",
       links: [
@@ -24,7 +25,7 @@ const App = () => {
     },
     {
       label: "Contact",
-      bgColor: "#2F293A", 
+      bgColor: "#2F293A",
       textColor: "#fff",
       links: [
         { label: "Email", href: "mailto:hello@example.com", ariaLabel: "Email us" },
@@ -34,28 +35,40 @@ const App = () => {
     }
   ];
 
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <Aurora
-        colorStops={["#7cff67", "#B497CF", "#5227FF"]}
-        blend={1}
-        amplitude={2.5}
-        speed={0.2}
-      /> 
-      <div className="">
-        <CardNav
-            logo={logo}
-            logoAlt="Company Logo"
-            items={items}
-            baseColor="#fff"
-            menuColor="#000"
-            buttonBgColor="#111"
-            buttonTextColor="#fff"
-            ease="power3.out"
+    return (
+    // 1. Added 'relative' for positioning and 'bg-black' for that premium glow
+    // 2. 'overflow-hidden' prevents the aurora from causing weird scrollbars
+    <div className="relative flex min-h-screen w-full flex-col items-center justify-center bg-zinc-950 font-sans overflow-hidden">
+      
+      {/* Background Layer */}
+      {/* 3. 'pointer-events-none' ensures you can still click your buttons! */}
+      {/* 4. '-z-10' keeps it strictly in the background */}
+      <div className="absolute inset-0 pointer-events-none z-1">
+        <Aurora
+          colorStops={["#7cff67", "#B497CF", "#5227FF"]}
+          blend={0.5}      // Reduced blend slightly for a sharper, more realistic effect
+          amplitude={1.5}    // Adjusted for a more balanced height
+          speed={0.2}
         />
       </div>
+
+      {/* Content Layer */}
+      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-transparent sm:items-start">
+        
+        <CardNav
+          logo={logo}
+          logoAlt="Company Logo"
+          items={items}
+          baseColor="black" // Making the nav blend in
+          menuColor="#fff"
+          buttonBgColor="#c84545ff"
+          buttonTextColor="#000"
+          ease="power3.out"
+        />
+      </main>
     </div>
   )
+
 }
 
 export default App;

@@ -190,18 +190,16 @@ By doing this, we guarantee that `@prisma/client` is successfully installed in t
 
 ---
 
-## 13. Successful Production Build & Deployment
+## 13. Resolving Monorepo Module Imports
 
 **My Prompt:**
-> "1 migration found in prisma/migrations. No pending migrations to apply. Applying modifyConfig from Vercel. Next.js 16.2.4 (Turbopack). Creating an optimized production build ... Add to the markdown file"
+> "Import traces: App Route: ./apps/web/auth.ts ... Module not found at <unknown> (./apps/web/auth.ts:3:1) Error: Command 'npm run build' exited with 1"
 
-**The Issue / Milestone:**
-After resolving the monorepo pathing and dependency issues, we needed to verify that the Vercel build pipeline could successfully execute the database migrations and compile the Next.js application.
+**The Issue:**
+Although the database deployment succeeded, the Next.js build failed when trying to compile `auth.ts`. The error occurred on line 3: `import { prisma } from '@yellow/db/client';`. Because this is a custom monorepo and the `@yellow/db` package wasn't fully configured to export `client` in its `package.json` (or via a TypeScript path alias), Next.js could not resolve the module alias.
 
 **The Technical Solution:**
-The terminal output confirms that our final build script is working perfectly! 
-1. Prisma successfully located the `init` migration file we created earlier.
-2. It verified that the production database on Vercel is already up-to-date (`No pending migrations to apply`).
-3. It successfully handed the build process back to Next.js (`Creating an optimized production build ...`).
-
-Our automated continuous integration (CI) pipeline for database migrations and frontend deployments is now fully operational!
+Instead of reconfiguring the entire monorepo structure to support package-level exports, we used a direct relative import. We updated `apps/web/auth.ts` to import the Prisma client directly from the file system:
+* **Old Import:** `import { prisma } from '@yellow/db/client';`
+* **New Import:** `import { prisma } from '../../packages/db/src/client';`
+This allows Next.js and TypeScript to accurately trace the file path and bundle the Prisma client successfully into the application.

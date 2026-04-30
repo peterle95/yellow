@@ -1,6 +1,6 @@
 import NextAuth from 'next-auth';
 import { PrismaAdapter } from '@auth/prisma-adapter';
-import { prisma } from '@yellow/db/client';
+import { prisma } from '../../packages/db/src/client';
 import { authConfig } from './auth.config';
 
 // Import providers you want to use here

@@ -171,3 +171,19 @@ We modified the build script to change directories (`cd`) into the `packages/db`
 * **Old Script:** `"build": "prisma generate && prisma migrate deploy && next build"`
 * **New Script:** `"build": "cd ../../packages/db && npx prisma generate && npx prisma migrate deploy && cd ../../apps/web && next build"`
 This safely guarantees the migrations deploy properly before the web app builds.
+
+---
+
+## 12. Fixing Missing @prisma/client in Monorepo
+
+**My Prompt:**
+> "npm warn exec The following package was not found... Error: Could not resolve @prisma/client... Fix and update @[AUTH_IMPLEMENTATION_LOG.md]"
+
+**The Issue:**
+Even though we directed Vercel to run `prisma generate` inside the `packages/db` directory, the build failed because `@prisma/client` couldn't be resolved. This happened because in our monorepo setup, you installed `@prisma/client` exclusively inside `apps/web/package.json`. When the Vercel build script navigated into `packages/db` to run the generation, it didn't have local access to the client package needed by the `prisma.config.ts` configuration.
+
+**The Technical Solution:**
+We updated the Vercel build script in `apps/web/package.json` to explicitly install the Prisma client right before running the generation. 
+* **Old Script:** `"build": "cd ../../packages/db && npx prisma generate && npx prisma migrate deploy && cd ../../apps/web && next build"`
+* **New Script:** `"build": "cd ../../packages/db && npm install @prisma/client && npx prisma generate && npx prisma migrate deploy && cd ../../apps/web && next build"`
+By doing this, we guarantee that `@prisma/client` is successfully installed in the `packages/db` context, allowing the schema to compile and generate properly during the Vercel deployment pipeline.

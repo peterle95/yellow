@@ -219,3 +219,23 @@ We updated `packages/db/src/client.ts` to use the standard NPM module import for
 * **Old Import:** `import { PrismaClient } from "../prisma/client";`
 * **New Import:** `import { PrismaClient } from "@prisma/client";`
 This tells the TypeScript compiler and Next.js bundler to look in `node_modules` for the generated Prisma client, allowing the application to compile successfully.
+
+---
+
+## 16. Prisma 7 Constructor Deprecations
+
+**My Prompt:**
+> "Type error: Object literal may only specify known properties, and 'datasourceUrl' does not exist in type 'Subset<PrismaClientOptions, PrismaClientOptions>'"
+
+**The Issue:**
+During the final build compilation, TypeScript caught an error inside `packages/db/src/client.ts`. Our original setup passed `datasourceUrl: process.env.POSTGRES_PRISMA_DATABASE_URL` to the `new PrismaClient()` constructor. However, in Prisma 7, the traditional `datasourceUrl` (and `datasources` object) have been completely removed from the constructor options, leading to a strict TypeScript rejection.
+
+**The Technical Solution:**
+Prisma 7 now expects the database URL to be read dynamically from the standard `process.env.DATABASE_URL` variable at runtime. Because Vercel injects our connection string using custom variable names (like `POSTGRES_PRISMA_URL`), we implemented a dynamic mapping solution right before the client is instantiated:
+```typescript
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = process.env.POSTGRES_PRISMA_DATABASE_URL || process.env.POSTGRES_PRISMA_URL;
+}
+export const prisma = globalForPrisma.prisma || new PrismaClient();
+```
+This satisfies Prisma 7's new constraints without requiring additional driver adapters, completely resolving the TypeScript build error!

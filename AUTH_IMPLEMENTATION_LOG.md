@@ -203,3 +203,19 @@ Instead of reconfiguring the entire monorepo structure to support package-level 
 * **Old Import:** `import { prisma } from '@yellow/db/client';`
 * **New Import:** `import { prisma } from '../../packages/db/src/client';`
 This allows Next.js and TypeScript to accurately trace the file path and bundle the Prisma client successfully into the application.
+
+---
+
+## 15. Resolving Internal Prisma Client Import
+
+**My Prompt:**
+> "Import traces: App Route: ./packages/db/src/client.ts ... Module not found at <unknown> (./packages/db/src/client.ts:1:1) Error: Command 'npm run build' exited with 1"
+
+**The Issue:**
+After fixing the import in `auth.ts`, Next.js successfully found `client.ts`. However, inside `client.ts` itself, the Prisma client was being imported via a relative path: `import { PrismaClient } from "../prisma/client";`. Because Prisma automatically generates its client into the `node_modules/@prisma/client` folder (unless a custom output is specified in `schema.prisma`), using a relative path caused a Module Not Found error.
+
+**The Technical Solution:**
+We updated `packages/db/src/client.ts` to use the standard NPM module import for the Prisma client.
+* **Old Import:** `import { PrismaClient } from "../prisma/client";`
+* **New Import:** `import { PrismaClient } from "@prisma/client";`
+This tells the TypeScript compiler and Next.js bundler to look in `node_modules` for the generated Prisma client, allowing the application to compile successfully.

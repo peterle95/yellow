@@ -1,4 +1,3 @@
-import Test from "../components/test"
 import CardNav from "../components/CardNav"
 import logo from "../../public/file.svg"
 import Aurora from '../components/Aurora';
